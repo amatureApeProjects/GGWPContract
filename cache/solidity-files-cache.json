@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/dariantaban/Documents/scratchWork/projects/alchemyTest/contracts/GGWP.sol": {
-      "lastModificationDate": 1636685245379,
-      "contentHash": "06fb859ec77d899449c38e7c37e3cb44",
+      "lastModificationDate": 1636694979629,
+      "contentHash": "066aa84ad6876528da54ba388f81a489",
       "sourceName": "contracts/GGWP.sol",
       "solcConfig": {
         "version": "0.6.12",
@@ -35,12 +35,12 @@
       "artifacts": [
         "Address",
         "Context",
-        "GM",
+        "GGWP",
         "IERC20",
-        "IUniswapV2Factory",
-        "IUniswapV2Pair",
-        "IUniswapV2Router01",
-        "IUniswapV2Router02",
+        "IPancakeswapV2Factory",
+        "IPancakeswapV2Pair",
+        "IPancakeswapV2Router01",
+        "IPancakeswapV2Router02",
         "Ownable",
         "SafeMath"
       ]

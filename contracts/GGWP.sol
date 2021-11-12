@@ -542,7 +542,7 @@ contract Ownable is Context {
 
 // pragma solidity >=0.5.0;
 
-interface IUniswapV2Factory {
+interface IPancakeswapV2Factory {
     event PairCreated(
         address indexed token0,
         address indexed token1,
@@ -574,7 +574,7 @@ interface IUniswapV2Factory {
 
 // pragma solidity >=0.5.0;
 
-interface IUniswapV2Pair {
+interface IPancakeswapV2Pair {
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -685,7 +685,7 @@ interface IUniswapV2Pair {
 
 // pragma solidity >=0.6.2;
 
-interface IUniswapV2Router01 {
+interface IPancakeswapV2Router01 {
     function factory() external pure returns (address);
 
     function WETH() external pure returns (address);
@@ -846,7 +846,7 @@ interface IUniswapV2Router01 {
 
 // pragma solidity >=0.6.2;
 
-interface IUniswapV2Router02 is IUniswapV2Router01 {
+interface IPancakeswapV2Router02 is IPancakeswapV2Router01 {
     function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
         uint256 liquidity,
@@ -893,7 +893,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
     ) external;
 }
 
-contract GM is Context, IERC20, Ownable {
+contract GGWP is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -911,8 +911,8 @@ contract GM is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "GM";
-    string private _symbol = "GM";
+    string private _name = "GGWP";
+    string private _symbol = "GGWP";
     uint8 private _decimals = 9;
 
     uint256 public _taxFee = 2;
@@ -921,8 +921,8 @@ contract GM is Context, IERC20, Ownable {
     uint256 public _liquidityFee = 8;
     uint256 private _previousLiquidityFee = _liquidityFee;
 
-    IUniswapV2Router02 public immutable uniswapV2Router;
-    address public immutable uniswapV2Pair;
+    IPancakeswapV2Router02 public immutable pancakeswapV2Router;
+    address public immutable pancakeswapV2Pair;
     address payable public _charityWalletAddress;
 
     bool inSwapAndLiquify;
@@ -949,15 +949,16 @@ contract GM is Context, IERC20, Ownable {
         _charityWalletAddress = charityWalletAddress;
         _rOwned[_msgSender()] = _rTotal;
 
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+        IPancakeswapV2Router02 _pancakeswapV2Router = IPancakeswapV2Router02(
+            0x10ED43C718714eb63d5aA57B78B54704E256024E
         );
-        // Create a uniswap pair for this new token
-        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
-            .createPair(address(this), _uniswapV2Router.WETH());
+        // Create a pancakeswap pair for this new token
+        pancakeswapV2Pair = IPancakeswapV2Factory(
+            _pancakeswapV2Router.factory()
+        ).createPair(address(this), _pancakeswapV2Router.WETH());
 
         // set the rest of the contract variables
-        uniswapV2Router = _uniswapV2Router;
+        pancakeswapV2Router = _pancakeswapV2Router;
 
         //exclude owner and this contract from fee
         _isExcludedFromFee[owner()] = true;
@@ -1109,7 +1110,7 @@ contract GM is Context, IERC20, Ownable {
     }
 
     function excludeFromReward(address account) public onlyOwner {
-        // require(account != 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D, 'We can not exclude Uniswap router.');
+        // require(account != 0x10ED43C718714eb63d5aA57B78B54704E256024E, 'We can not exclude Pancakeswap router.');
         require(!_isExcluded[account], "Account is already excluded");
         if (_rOwned[account] > 0) {
             _tOwned[account] = tokenFromReflection(_rOwned[account]);
@@ -1178,7 +1179,7 @@ contract GM is Context, IERC20, Ownable {
         emit SwapAndLiquifyEnabledUpdated(_enabled);
     }
 
-    //to recieve ETH from uniswapV2Router when swaping
+    //to recieve BNB from pancakeswapV2Router when swaping
     receive() external payable {}
 
     function _reflectFee(uint256 rFee, uint256 tFee) private {
@@ -1355,7 +1356,7 @@ contract GM is Context, IERC20, Ownable {
         // is the token balance of this contract address over the min number of
         // tokens that we need to initiate a swap + liquidity lock?
         // also, don't get caught in a circular liquidity event.
-        // also, don't swap & liquify if sender is uniswap pair.
+        // also, don't swap & liquify if sender is pancakeswap pair.
         uint256 contractTokenBalance = balanceOf(address(this));
 
         if (contractTokenBalance >= _maxTxAmount) {
@@ -1367,7 +1368,7 @@ contract GM is Context, IERC20, Ownable {
         if (
             overMinTokenBalance &&
             !inSwapAndLiquify &&
-            from != uniswapV2Pair &&
+            from != pancakeswapV2Pair &&
             swapAndLiquifyEnabled
         ) {
             contractTokenBalance = numTokensSellToAddToLiquidity;
@@ -1407,7 +1408,7 @@ contract GM is Context, IERC20, Ownable {
         // how much ETH did we just swap into?
         uint256 newBalance = address(this).balance.sub(initialBalance);
 
-        // add liquidity to uniswap
+        // add liquidity to pancakeswap
         addLiquidity(otherHalfOfLiquify, newBalance);
         sendBNBToCharity(portionForFees);
 
@@ -1415,15 +1416,15 @@ contract GM is Context, IERC20, Ownable {
     }
 
     function swapTokensForEth(uint256 tokenAmount) private {
-        // generate the uniswap pair path of token -> weth
+        // generate the pancakswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
-        path[1] = uniswapV2Router.WETH();
+        path[1] = pancakeswapV2Router.WETH();
 
-        _approve(address(this), address(uniswapV2Router), tokenAmount);
+        _approve(address(this), address(pancakeswapV2Router), tokenAmount);
 
         // make the swap
-        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+        pancakeswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
             tokenAmount,
             0, // accept any amount of ETH
             path,
@@ -1434,10 +1435,10 @@ contract GM is Context, IERC20, Ownable {
 
     function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
         // approve token transfer to cover all possible scenarios
-        _approve(address(this), address(uniswapV2Router), tokenAmount);
+        _approve(address(this), address(pancakeswapV2Router), tokenAmount);
 
         // add the liquidity
-        uniswapV2Router.addLiquidityETH{value: ethAmount}(
+        pancakeswapV2Router.addLiquidityETH{value: ethAmount}(
             address(this),
             tokenAmount,
             0, // slippage is unavoidable

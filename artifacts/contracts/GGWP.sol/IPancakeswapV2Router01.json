@@ -1,6 +1,6 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "IUniswapV2Router01",
+  "contractName": "IPancakeswapV2Router01",
   "sourceName": "contracts/GGWP.sol",
   "abi": [
     {

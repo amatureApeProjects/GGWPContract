@@ -1,6 +1,6 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "IUniswapV2Factory",
+  "contractName": "IPancakeswapV2Factory",
   "sourceName": "contracts/GGWP.sol",
   "abi": [
     {
